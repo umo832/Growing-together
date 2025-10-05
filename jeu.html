@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de questions</title>
+    <style>
+        body {
+           margin: 0;
+           font-family: 'segoe UI', sans-serif;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           background: linear-gradient(-45deg, #1e3c72, #2a5298, #6dd5ed, #2193b0);
+           background-size: 400% 400%;
+           animation: gradientBG 12s ease infinite;
+           overflow: hidden;
+           padding: 20px;
+        }
+        @keyframes gradientBG{
+            0%{background-position: 0% 50%;}
+            50%{background-position: 100% 50%;}
+            100%{background-position: 0% 50%;}
+        }
+        h2{
+            color: white;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .card{
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            color: #2a5298;
+            margin: 20px 0;
+            opacity: 1;
+            transform: rotateY('90deg');
+            transition: all 0.9s ease;
+        }
+        .card.show {
+            opacity: 1;
+            transform: rotateY('0deg');
+        }
+        #drawBtn, #bonusBtn, #homeBtn{
+            background-color: #2a5298;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 5px;
+            transition: transforme 0.3s, background-color 0.3s;
+        }
+        #drawBtn:hover, #bonusBtn:hover, #homeBtn:hover{
+            transform: scale(1.05);
+            background-color: #1e3c72;
+        }
+        #counter{
+            color:#fff;
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+        .bubble{
+            position: absolute;
+            background: none;
+            border-radius: 50%;
+            padding: 0;
+            pointer-events: none;
+        }
+        .bubble::before {
+            content: "\2665";
+            font-size: 2.5rem;
+            display: block;
+            text-align: center;
+            line-height: 1;
+            opacity: 0.7;
+            color: inherit;
+        }
+        .bubble.bonus::before {
+            content: none;
+        }
+        .bubble.bonus {
+            z-index: 0;
+            pointer-events: none;
+            animation: floatBonusBubble 20s linear forwards;
+            opacity: 0.85;
+            bottom: 0;
+            top: auto;
+            background: #fff0f5;
+            border-radius: 30px;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            color: #ff4d6d;
+            box-shadow: 0 2px 12px rgba(255,77,109,0.15);
+        }
+        @keyframes floatBubble {
+            0%{opacity: 0; transform: translateY(0) scale(0.5);}
+            10%{opacity: 1;}
+            90%{opacity: 1;}
+            100%{opacity: 0; transform: var(--bubble-anim, translateY(-300px)) scale(0.5);}
+        }
+            @keyframes floatBonusBubble {
+                0% { opacity: 0.85; transform: translateY(0) scale(1); }
+                80% { opacity: 1; transform: translateY(-80vh) scale(1.1); }
+                100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+            }
+            @media (max-width: 600px){
+            body {
+                padding: 6px;
+            }
+            .card{
+                font-size: 0.98rem;
+                padding: 14px 6px;
+                border-radius: 13px;
+                max-width: 98vw;
+                margin: 10px 0;
+            }
+            #drawBtn, #bonusBtn, #homeBtn{
+                font-size: 0.93rem;
+                padding: 9px 7vw;
+                border-radius: 18px;
+                width: 90vw;
+                max-width: 320px;
+                margin: 6px 0;
+            }
+            #counter{
+                font-size: 0.93rem;
+                margin-top: 2px;
+            }
+            h2 {
+                font-size: 1.1rem;
+                margin: 10px 0 8px 0;
+            }
+            #homeBtn {
+                top: 6px;
+                left: 6px;
+                font-size: 0.85rem;
+                padding: 6px 12px;
+                border-radius: 14px;
+            }
+            .bubble::before {
+                font-size: 1.3rem;
+            }
+            .bubble.bonus {
+                font-size: 0.98rem;
+                padding: 8px 10px;
+                border-radius: 16px;
+            }
+        }
+        #homeBtn {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            background: rgba(42,82,152,0.7);
+            color: #fff;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            opacity: 0.5;
+            z-index: 10;
+            transition: opacity 0.3s, background 0.3s, transform 0.3s;
+            box-shadow: 0 2px 8px rgba(30,60,114,0.08);
+        }
+        #homeBtn:hover {
+            opacity: 1;
+            background: #1e3c72;
+            transform: scale(1.07);
+        }
+        .flying-heart {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 1s, transform 1.2s cubic-bezier(.4,1.6,.6,1);
+            opacity: 1;
+            will-change: transform, opacity;
+        }
+        @media (max-width: 600px){
+            .flying-heart {
+                font-size: 1.2rem;
+            }
+        }
+        body.light {
+            background: linear-gradient(-45deg, #f7fafc, #e3e9f3, #fffbe3, #e0eafc);
+            color: #2a5298;
+        }
+        body.light h2, body.light #gameTitle, body.light #turnIndicator, body.light #welcomeGame {
+            color: #2a5298 !important;
+        }
+        body.light .card {
+            background: #fffbe3;
+            color: #2a5298;
+            box-shadow: 0 8px 20px rgba(42,82,152,0.08);
+        }
+        body.light #drawBtn, body.light #bonusBtn, body.light #homeBtn, body.light #newGameBtn {
+            background: #e0eafc;
+            color: #2a5298;
+        }
+        body.light #drawBtn:hover, body.light #bonusBtn:hover, body.light #homeBtn:hover, body.light #newGameBtn:hover {
+            background: #b3c6e7;
+            color: #2a5298;
+        }
+        body.light #addQuestionBtn {
+            background: #ffe3f0;
+            color: #a259c4;
+        }
+        body.light #sendHeartBtn {
+            background: #ffd6e0;
+            color: #ff69b4;
+        }
+        body.light #historyBtn {
+            background: #e0eafc;
+            color: #2a5298;
+        }
+        body.light .bubble.bonus {
+            background: #fffbe3;
+            color: #a259c4;
+        }
+        body.light #historyPanel {
+            background: rgba(255,255,255,0.7);
+            color: #2a5298;
+        }
+        body.light .flying-heart {
+            filter: drop-shadow(0 2px 8px #ffe3f0);
+        }
+    </style>
+</head>
+<body>
+    <button id="homeBtn" href="Index.html">Retour à l'accueil</button>
+    <button id="themeToggleBtn" style="position:fixed;top:18px;right:18px;background:#fff;color:#2a5298;border:none;border-radius:20px;padding:7px 16px;font-size:0.95rem;z-index:11;box-shadow:0 2px 8px rgba(30,60,114,0.08);cursor:pointer;opacity:0.7;transition:opacity 0.3s,background 0.3s,transform 0.3s;">🌙 Mode sombre</button>
+    <button id="bgAnimBtn" style="position:fixed;top:60px;right:18px;background:#fff;color:#2a5298;border:none;border-radius:20px;padding:7px 16px;font-size:0.95rem;z-index:11;box-shadow:0 2px 8px rgba(30,60,114,0.08);cursor:pointer;opacity:0.7;transition:opacity 0.3s,background 0.3s,transform 0.3s;">🎨 Animation de fond</button>
+    <div id="bgAnimMenu" style="display:none;position:fixed;top:100px;right:18px;background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(30,60,114,0.13);padding:10px 18px;z-index:12;">
+        <div style="margin-bottom:6px;font-weight:bold;color:#2a5298;">Choisir l'animation :</div>
+        <button class="bgAnimOpt" data-anim="heart" style="margin:3px 0;padding:4px 12px;border-radius:12px;border:none;background:#ffe3f0;color:#c2185b;cursor:pointer;">Cœurs</button><br>
+        <button class="bgAnimOpt" data-anim="bubble" style="margin:3px 0;padding:4px 12px;border-radius:12px;border:none;background:#e0eafc;color:#2a5298;cursor:pointer;">Bulles</button><br>
+        <button class="bgAnimOpt" data-anim="star" style="margin:3px 0;padding:4px 12px;border-radius:12px;border:none;background:#fffbe3;color:#f7b731;cursor:pointer;">Étoiles</button><br>
+        <button class="bgAnimOpt" data-anim="cat" style="margin:3px 0;padding:4px 12px;border-radius:12px;border:none;background:#f7cac9;color:#a259c4;cursor:pointer;">Chats</button>
+    </div>
+    <div id="welcomeGame" style="color:#ffe3f0; font-size:1.08rem; margin:10px 0 0 0; text-align:center; font-style:italic; opacity:0.85;"></div>
+    <h2 id="gameTitle">JEU DE QUESTIONS</h2>
+    <div id="turnIndicator" style="color:#ffd6e0; font-size:1.08rem; margin-bottom:6px; text-align:center;"></div>
+
+    <div class="card" id="card">cliquez sur piocher une question pour commencer !</div>
+    <button id="drawBtn">Piochez une question</button>
+    <button id="addQuestionBtn" style="background:#a259c4; color:#fff; border:none; border-radius:18px; padding:8px 18px; font-size:1rem; margin:8px 0 0 0; cursor:pointer; box-shadow:0 2px 8px rgba(30,60,114,0.08);">Ajouter une question</button>
+    <input id="customQuestion" type="text" placeholder="Votre question personnalisée..." style="width:70vw; max-width:340px; margin:8px 0 0 0; padding:8px 12px; border-radius:16px; border:1px solid #eee; font-size:1rem; outline:none;">
+    <button id="sendHeartBtn" style="background:#ff69b4; color:#fff; border:none; border-radius:18px; padding:8px 22px; font-size:1rem; margin:8px 0 0 0; cursor:pointer; box-shadow:0 2px 8px rgba(30,60,114,0.08);">Envoyer un cœur</button>
+    <button id="historyBtn" style="background:#ffd6e0; color:#2a5298; border:none; border-radius:18px; padding:8px 22px; font-size:1rem; margin:8px 0 0 0; cursor:pointer; box-shadow:0 2px 8px rgba(30,60,114,0.08);">Historique</button>
+    <button id="newGameBtn" style="background:#ffb347; color:#2a5298; border:none; border-radius:18px; padding:8px 22px; font-size:1rem; margin:8px 0 0 0; cursor:pointer; box-shadow:0 2px 8px rgba(30,60,114,0.08);">Nouvelle partie</button>
+    <div id="historyPanel" style="display:none; background:rgba(255,255,255,0.13); color:#fff; border-radius:16px; margin:10px auto 0 auto; padding:12px 16px; font-size:1rem; max-width:400px; box-shadow:0 2px 8px rgba(30,60,114,0.08); text-align:left;"></div>
+    <div id="counter"></div>
+    <button id="bonusBtn">Surprise bonus</button>
+    <audio id="drawSound" src="https://cdn.pixabay.com/audio/2022/10/16/audio_12c1b6b6b2.mp3" preload="auto"></audio>
+
+    <script>
+        // --- Prénoms personnalisés depuis localStorage ---
+        const prenom1 = localStorage.getItem('prenom1') || '';
+        const prenom2 = localStorage.getItem('prenom2') || '';
+        const gameTitle = document.getElementById('gameTitle');
+        if(prenom1 && prenom2) {
+            gameTitle.textContent = `JEU DE QUESTIONS - ${prenom1} & ${prenom2}`;
+        } else if(prenom1 || prenom2) {
+            gameTitle.textContent = `JEU DE QUESTIONS - ${(prenom1||prenom2)}`;
+        }
+
+        const questions=[
+            //connaissance de soi
+            "Quelle est la chose que tu aimes le plus chez toi en ce moment ?",
+            "Quelle peur aimerais-tu transformer en force ?",
+            "Si tu pouvais revivre un seul moment de ton passé, lequel choisirais-tu ?",
+            "Auelle est ta plus grande qualité que peu de gens connaissent ?",
+            "Quand te sens-tu le plus en paix avec toi-même ?",
+            "Quelle est la plus grande qualité que tu admires en toi ?",
+            "Quel défaut t'empêche parfois d'avancer ?",
+            "Quand est-ce que tu te sens le plus toi-même ?",
+            "Si tu pouvais changer une habitude aujourd'hui, ça serait laquelle ?",
+            "Quel moment de ta vie t'a le plus transformé(e) ?",
+            //Sur le couple
+            "Qu'est-ce que tu ressens quand tu penses à notre futur ensemble ?",
+            "Quelle petite chose que je fais te fait sourire à chaque fois ?",
+            "Si tu devais me décrire en trois mots à quelqu'un, lequels choisirais-tu ?",
+            "Quelle est la chose la plus importante pour toi dans une relation ?",
+            "Quel est ton plus beau souvenir avec moi jusqu'ici ?",
+            "Quelle est la plus belle chose que tu ressens dans notre relation ?",
+            "Quel petit geste de moi de moi te fais toujous sourire ?",
+            "Qu'est-ce que tu aimerais que l'on fasse plus souvent ensemble ?",
+            "Quelle valeur est la plus importante pour toi dans notre couple ?",
+            "Si tu devais choisir un mot pour décrire notre amour, ce serait lequel ?",
+            //Rêve et ambitions
+            "Quel rêve personnel aimerais-tu réaliser dans les 5 prochaines années ?",
+            "Si tu pouvais lancer un projet fou sans limite de moyens, ce serait quoi ?",
+            "Quelle est la plus grande victoire que tu aimerais fêterdans ta vie ?",
+            "Quelle habitude aimerais-tu développer pour devenir une meilleure version de toi-même ?",
+            "Si tu pouvais apprendre une compétence instantanément, ce serait laquelle ?",
+            "Quel est ton rêve secret que tu n'as jamais osé partager ?",
+            "Qu'est-ce qui te donne le plus confiance en toi ?",
+            "Quelle habitude aimerais-tu développer pour grandir davantage ?",
+            "Si tu avais un mentor ou un modèle de vie, qui serait-ce ?",
+            "Quel livre ou quelle idée t'a le plus marqué dans ta vie ?",
+            //Vie et valeurs
+            "Quelle valeur est non négociable pour toi dans la vie ?",
+            "Qu'est-ce que la liberté signifie pour pour toi ?",
+            "Si tu pouvais changer une chose dans le monde, laquelle ce serait ?",
+            "Quelle est la personne qui t'inspire le plus et pourquoi ?",
+            "Quelle est ta définition du succès ?",
+             //Grandir ensemble 
+            "Qu'est-ce que grandir ensemble pour toi ?",
+            "Quel livre aimerais-tu qu'on lise ensemble ?",
+            "Si on devait créer un projet commun (hors couple), ce serait quoi ?",
+            "Qu'aimerais-tu que je découvre davantage de toi ?",
+            "Quel petit rituel aimerais-tu instaurer entre nous ?", 
+            //Légèreté et complicité
+            "Si tu pouvais nous téléporter maintenant, où aimerais-tu qu'on aille ?",
+            "Quelle chanson te fait toujours penser à moi ?",
+            "Si notre histoire était un film, quel serait son titre ?",
+            "quelle est la chose la chose la plus drôle qu'on ait vécue ensemble ?",
+            "Quelle surprise aimerais-tu que je t'offre un jour ?",
+        ];
+        const bonuspack =[
+            // Citations inspirantes
+            "L'amour, c'est regarder ensemble dans la même direction. (Saint-Exupéry)",
+            "Le bonheur, c'est de continuer à désirer ce que l'on possède. (Saint-Augustin)",
+            "Le plus grand voyage commence toujours par un premier pas.",
+            "Le sourire est le plus beau maquillage que l'on puisse porter.",
+            "On ne voit bien qu'avec le cœur. (Le Petit Prince)",
+            "Le mensonge donne des fleurs, mais jamais de fruits",
+            "Il n'y a qu'un seul bonheur dans la vie, aimer et être aimé. (George Sand)",
+            "Soyez le changement que vous voulez voir dans le monde. (Gandhi)",
+            "Nous recoltons ce que nous semons",
+            // Blagues légères
+            "Quel est le comble pour un électricien ? Ne pas être au courant !",
+            "Pourquoi les canards sont toujours à l'heure ? Parce qu'il sont dans l'étang",
+            "Que fait un crocodile quand il rencontre une superbe femelle ? Il Lacoste",
+            // Expressions ringardes/rigolotes
+            "Est-ce que ton nom est wi-fi ? Parce que je sens une connexion",
+            "Tu es le i de aimer, sans toi, ma vie est amer",
+            " Tu n'as pas un pansement ? je me suis fait mal en tombant sous ton charme ",
+            "Fais-tu de la boxe ? Parce que tu es hyper cute ",
+            "Mieux vaut être avec moi que mal accompagné",
+            "Eh bien, me voici. Quels sont tes deux autres souhaits ?",
+            "Tu crois en l'amour au premier regard ou je dois repasser une seconde fois ?",
+        ]
+        let remainingQuestions = [...questions];
+        const usedQuestions = [];
+
+        const cardiDiv = document.getElementById("card");
+        const drawBtn = document.getElementById("drawBtn");
+        const bonusBtn = document.getElementById("bonusBtn");
+        const homeBtn = document.getElementById("homeBtn");
+        const counter = document.getElementById("counter");
+        const historyBtn = document.getElementById('historyBtn');
+        const historyPanel = document.getElementById('historyPanel');
+        const addQuestionBtn = document.getElementById('addQuestionBtn');
+        const customQuestion = document.getElementById('customQuestion');
+        const sendHeartBtn = document.getElementById('sendHeartBtn');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        let bgAnimType = localStorage.getItem('bgAnimType') || 'heart';
+        const bgAnimBtn = document.getElementById('bgAnimBtn');
+        const bgAnimMenu = document.getElementById('bgAnimMenu');
+
+        function updateCounter() {
+            counter.textContent = `Questions ${usedQuestions.length + 1} sur ${questions.length}`;
+        }
+        // --- Indication de tour ---
+        let turn = 0; // 0: prenom1, 1: prenom2
+        const turnIndicator = document.getElementById('turnIndicator');
+        function updateTurn() {
+            const p1 = prenom1 || 'Joueur 1';
+            const p2 = prenom2 || 'Joueur 2';
+            turnIndicator.textContent = `À toi, ${turn === 0 ? p1 : p2} !`;
+        }
+        updateTurn();
+        drawBtn.addEventListener("click", () => {
+            const drawSound = document.getElementById('drawSound');
+            if(drawSound) {
+                drawSound.currentTime = 0;
+                drawSound.play();
+            }
+            if(remainingQuestions.length === 0) {
+                cardiDiv.textContent = "Toutes les questions ont été tirées !";
+                cardiDiv.classList.add("show");
+                return;
+            }
+            const idx = Math.floor(Math.random()*remainingQuestions.length);
+            const drawn = remainingQuestions.splice(idx, 1)[0];
+            usedQuestions.push(drawn);
+            cardiDiv.textContent = drawn;
+            cardiDiv.classList.add("show");
+            setTimeout(() => cardiDiv.classList.remove("show"), 800);
+            updateCounter();
+            updateHistory();
+            turn = 1 - turn;
+            updateTurn();
+        });
+        bonusBtn.addEventListener("click", ()=>{
+            // Supprimer la bulle bonus précédente s'il y en a une
+            const oldBonus = document.querySelector('.bubble.bonus');
+            if (oldBonus) oldBonus.remove();
+            const idx = Math.floor(Math.random() * bonuspack.length)
+            const drawn = bonuspack[idx];
+            const bubble = document.createElement("div");
+            bubble.classList.add("bubble", "bonus");
+            bubble.textContent = drawn;
+            // Positionner à gauche (10vw) ou à droite (70vw) aléatoirement
+            bubble.style.left = (Math.random() < 0.5 ? '10vw' : '70vw');
+            bubble.style.width = 'auto';
+            bubble.style.height = 'auto';
+            document.body.appendChild(bubble);
+        });
+        homeBtn.addEventListener("click", () =>{
+            window.location.href = "index.html";
+        });
+        historyBtn.addEventListener('click', ()=>{
+            if(historyPanel.style.display === 'none') {
+                updateHistory();
+                historyPanel.style.display = 'block';
+            } else {
+                historyPanel.style.display = 'none';
+            }
+        });
+        addQuestionBtn.addEventListener('click', function() {
+            const q = customQuestion.value.trim();
+            if(q.length < 8) {
+                customQuestion.value = '';
+                customQuestion.placeholder = 'Question trop courte !';
+                return;
+            }
+            questions.push(q);
+            remainingQuestions.push(q);
+            customQuestion.value = '';
+            customQuestion.placeholder = 'Ajoutée !';
+            setTimeout(()=>{ customQuestion.placeholder = 'Votre question personnalisée...'; }, 1200);
+        });
+        customQuestion.addEventListener('keydown', function(e){
+            if(e.key === 'Enter') addQuestionBtn.click();
+        });
+        // --- Nouvelle partie ---
+        const newGameBtn = document.getElementById('newGameBtn');
+        newGameBtn.addEventListener('click', function() {
+            remainingQuestions.splice(0, remainingQuestions.length, ...questions);
+            usedQuestions.length = 0;
+            cardiDiv.textContent = 'cliquez sur piocher une question pour commencer !';
+            updateCounter();
+            updateHistory();
+            turn = 0;
+            updateTurn();
+        });
+        bgAnimBtn.addEventListener('click', ()=>{
+            bgAnimMenu.style.display = bgAnimMenu.style.display === 'none' ? 'block' : 'none';
+        });
+        document.querySelectorAll('.bgAnimOpt').forEach(btn=>{
+            btn.addEventListener('click', function(){
+                bgAnimType = this.dataset.anim;
+                localStorage.setItem('bgAnimType', bgAnimType);
+                bgAnimMenu.style.display = 'none';
+            });
+        });
+        function createBubble() {
+            const bubble = document.createElement("div");
+            bubble.classList.add("bubble");
+            // Motif selon le choix
+            if(bgAnimType === 'heart') {
+                bubble.innerHTML = '';
+                bubble.style.color = ['#ff4d6d','#ffb347','#f67280','#f8b195','#ff69b4','#ff8da1','#ffd6e0'][Math.floor(Math.random()*7)];
+            } else if(bgAnimType === 'bubble') {
+                bubble.innerHTML = '';
+                bubble.style.color = ['#6dd5ed','#a259c4','#00b894','#fdcb6e','#e17055'][Math.floor(Math.random()*5)];
+                bubble.style.border = '2px solid #fff';
+            } else if(bgAnimType === 'star') {
+                bubble.innerHTML = '★';
+                bubble.style.fontSize = '2.2rem';
+                bubble.style.color = ['#f7b731','#fffbe3','#ffd700','#ffe066','#f9ca24'][Math.floor(Math.random()*5)];
+            } else if(bgAnimType === 'cat') {
+                bubble.innerHTML = '🐱';
+                bubble.style.fontSize = '2.2rem';
+                bubble.style.color = ['#a259c4','#f7cac9','#ffe3f0','#b2bec3'][Math.floor(Math.random()*4)];
+            }
+            // Position de départ aléatoire
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 100;
+            bubble.style.left = startX + "vw";
+            bubble.style.top = startY + "vh";
+            // Trajectoire aléatoire
+            const directions = [
+                "translateY(-300px)",
+                "translateY(300px)",
+                "translateX(-300px)",
+                "translateX(300px)",
+                "translate(-200px, -200px)",
+                "translate(200px, 200px)",
+                "translate(-200px, 200px)",
+                "translate(200px, -200px)"
+            ];
+            bubble.style.setProperty('--bubble-anim', directions[Math.floor(Math.random() * directions.length)]);
+            bubble.style.animationDuration = (Math.random() * 8 + 8) + "s";
+            document.body.appendChild(bubble);
+            setTimeout(() => { bubble.remove(); }, 16000);
+        }
+        setInterval(createBubble,1000);
+        // --- Cœurs animés au clic ---
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'flying-heart';
+            heart.innerText = '💖';
+            const colors = ['#ff69b4','#ffb6c1','#ffd6e0','#ff8da1','#ff4f81','#ffb347','#f7cac9'];
+            heart.style.color = colors[Math.floor(Math.random()*colors.length)];
+            heart.style.left = x - 16 + 'px';
+            heart.style.top = y - 16 + 'px';
+            heart.style.transform = `rotate(${Math.random()*40-20}deg)`;
+            document.body.appendChild(heart);
+            setTimeout(()=>{ heart.style.opacity = 0; heart.style.transform += ' translateY(-120px) scale(1.5)'; }, 20);
+            setTimeout(()=>{ heart.remove(); }, 1200);
+        }
+        document.body.addEventListener('click', function(e) {
+            // Ne pas créer de cœur si clic sur un bouton ou un lien
+            if(e.target.closest('button') || e.target.closest('a')) return;
+            createHeart(e.clientX, e.clientY);
+        });
+        // --- Message d'accueil personnalisé ---
+        const welcomeGame = document.getElementById('welcomeGame');
+        if(prenom1 && prenom2) {
+            welcomeGame.textContent = `Bienvenue pour ce moment complice, ${prenom1} & ${prenom2} !`;
+        } else if(prenom1 || prenom2) {
+            welcomeGame.textContent = `Bienvenue pour ce moment complice, ${(prenom1||prenom2)} !`;
+        } else {
+            welcomeGame.textContent = `Bienvenue pour ce moment complice à deux !`;
+        }
+        function updateHistory() {
+            if(usedQuestions.length === 0) {
+                historyPanel.innerHTML = '<i>Aucune question tirée pour le moment.</i>';
+            } else {
+                historyPanel.innerHTML = '<b>Questions déjà tirées :</b><ul style="margin:8px 0 0 0; padding-left:18px;">' + usedQuestions.map(q => `<li style='margin-bottom:6px;'>${q}</li>`).join('') + '</ul>';
+            }
+        }
+        sendHeartBtn.addEventListener('click', function() {
+            // Animation d'un gros cœur au centre de l'écran
+            const heart = document.createElement('div');
+            heart.className = 'flying-heart';
+            heart.innerText = '💖';
+            heart.style.color = '#ff69b4';
+            heart.style.left = '50vw';
+            heart.style.top = '50vh';
+            heart.style.fontSize = '3.5rem';
+            heart.style.transform = 'translate(-50%, -50%) scale(1)';
+            heart.style.transition = 'opacity 1.2s, transform 1.2s cubic-bezier(.4,1.6,.6,1)';
+            document.body.appendChild(heart);
+            setTimeout(()=>{ heart.style.opacity = 0; heart.style.transform += ' translateY(-120px) scale(1.7)'; }, 30);
+            setTimeout(()=>{ heart.remove(); }, 1400);
+        });
+        function setTheme(mode) {
+            if(mode === 'light') {
+                document.body.classList.add('light');
+                themeToggleBtn.textContent = '🌙 Mode sombre';
+            } else {
+                document.body.classList.remove('light');
+                themeToggleBtn.textContent = '☀️ Mode clair';
+            }
+            localStorage.setItem('theme', mode);
+        }
+        themeToggleBtn.addEventListener('click', function() {
+            const isLight = document.body.classList.contains('light');
+            setTheme(isLight ? 'dark' : 'light');
+        });
+        // Initialisation du thème au chargement
+        setTheme(localStorage.getItem('theme') === 'light' ? 'light' : 'dark');
+    </script>
+</body>
+</html>

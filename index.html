@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            margin: 0;
+            font-family: 'segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(-45deg, #1e3c72, #2a5298, #6dd5ed, #2193b0);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            overflow: hidden;
+            padding: 20px;
+        }
+        @keyframes gradientBG{
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        #welcome {
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+            max-width: 500px;
+            background: rgba(42,82,152,0.18);
+            border-radius: 30px;
+            box-shadow: 0 8px 20px rgba(30,60,114,0.10);
+        }
+        h1{
+            font-size: 2.2rem;
+            margin-bottom: 18px;
+            animation: pulse 2.5s infinite;
+            color: #fff;
+        }
+        @keyframes pulse {
+            0%{transform: scale(1);}
+            50%{transform: scale(1.08);}
+            100%{transform: scale(1);}
+        }
+        p{
+            font-size: 1.15rem;
+            margin-bottom: 32px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+        #StartBtn{
+            background: #2a5298;
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(30,60,114,0.12);
+            transition: background 0.3s, transform 0.3s;
+        }
+        #StartBtn:hover{
+            background: #1e3c72;
+            transform: scale(1.07);
+        }
+        .logo-heart {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            animation: heartBeat 1.6s infinite, pulse 2.5s infinite;
+            display: inline-block;
+            transition: filter 0.4s;
+        }
+        @keyframes heartBeat {
+            0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 #ffb6c1); }
+            10% { transform: scale(1.18) translateY(-2px); filter: drop-shadow(0 0 8px #ffb6c1); }
+            20% { transform: scale(0.98) translateY(1px); filter: drop-shadow(0 0 0 #ffb6c1); }
+            30% { transform: scale(1.12) translateY(-2px); filter: drop-shadow(0 0 10px #ff69b4); }
+            40% { transform: scale(0.96) translateY(1px); filter: drop-shadow(0 0 0 #ffb6c1); }
+            50% { transform: scale(1.08) translateY(-1px); filter: drop-shadow(0 0 8px #ffb6c1); }
+            60% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 #ffb6c1); }
+            100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 0 #ffb6c1); }
+        }
+        .subtitle {
+            color: #ffd6e0;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            font-weight: 400;
+        }
+        .info-btn {
+            background: transparent;
+            color: #fff;
+            border: 1.5px solid #fff;
+            border-radius: 20px;
+            padding: 7px 22px;
+            font-size: 1rem;
+            margin-left: 10px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: background 0.3s, color 0.3s, opacity 0.3s;
+        }
+        .info-btn:hover {
+            background: #fff;
+            color: #2a5298;
+            opacity: 1;
+        }
+        .info-panel {
+            background: rgba(255,255,255,0.13);
+            color: #fff;
+            border-radius: 18px;
+            margin: 18px auto 0 auto;
+            padding: 15px 18px;
+            font-size: 1rem;
+            max-width: 400px;
+            box-shadow: 0 2px 8px rgba(30,60,114,0.08);
+        }
+        .citation {
+            margin-top: 22px;
+            font-size: 1.05rem;
+            color: #ffe3f0;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            width: 100vw;
+            text-align: center;
+            color: #fff;
+            font-size: 0.95rem;
+            opacity: 0.5;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes rise{
+            from{transform: translateY(0);}
+            to{transform: translateY(-120vh);}
+        }
+        .flying-heart {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 1s, transform 1.2s cubic-bezier(.4,1.6,.6,1);
+            opacity: 1;
+            will-change: transform, opacity;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 6px;
+            }
+            #welcome {
+                max-width: 99vw;
+                padding: 8px 1vw;
+                border-radius: 14px;
+                box-shadow: 0 2px 8px rgba(30,60,114,0.10);
+            }
+            h1 {
+                font-size: 1.08rem;
+                margin-bottom: 7px;
+            }
+            .subtitle {
+                font-size: 0.93rem;
+                margin-bottom: 7px;
+            }
+            p, .citation {
+                font-size: 0.93rem;
+                margin-bottom: 18px;
+            }
+            #StartBtn, .info-btn {
+                font-size: 0.98rem;
+                padding: 10px 8vw;
+                border-radius: 18px;
+                width: 90vw;
+                max-width: 320px;
+                margin-bottom: 8px;
+            }
+            .logo-heart {
+                font-size: 1.1rem;
+                margin-bottom: 2px;
+            }
+            .footer {
+                font-size: 0.7rem;
+                padding: 0 1vw;
+            }
+            .flying-heart {
+                font-size: 1rem;
+            }
+            input[type="text"] {
+                font-size: 0.93rem;
+                min-width: 60px;
+                padding: 6px 7px;
+                border-radius: 14px;
+                width: 38vw;
+                max-width: 140px;
+            }
+            #infoPanel {
+                font-size: 0.93rem;
+                padding: 10px 6px;
+                max-width: 95vw;
+            }
+            .info-panel {
+                margin: 10px auto 0 auto;
+            }
+            .citation {
+                margin-top: 12px;
+            }
+            .footer {
+                bottom: 2px;
+            }
+            .bubble {
+                width: 18px !important;
+                height: 18px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome">
+        <div class="logo-heart">💖</div>
+        <h1 id="welcomeTitle">Bienvenue dans notre espace</h1>
+        <h2 class="subtitle">Un moment complice à vivre à deux, même à distance</h2>
+        <p>Chaque dimanche, prenons un moment pour rire, rêver et nous découvrir <br>
+        ici, on grandit ensemble, avec douceur, complicité et joie.</p>
+        <div style="display:flex; justify-content:center; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+            <input id="prenom1" type="text" placeholder="Prénom 1" style="padding:8px 16px; border-radius:18px; border:1px solid #eee; font-size:1rem; outline:none; min-width:110px;">
+            <input id="prenom2" type="text" placeholder="Prénom 2" style="padding:8px 16px; border-radius:18px; border:1px solid #eee; font-size:1rem; outline:none; min-width:110px;">
+        </div>
+        <button id="StartBtn">Commencer le jeu !</button>
+        <button id="infoBtn" class="info-btn">En savoir plus</button>
+        <div id="infoPanel" class="info-panel" style="display:none;">
+            <p><b>But du jeu :</b> Se découvrir, s’amuser et renforcer votre complicité à distance.<br>
+            <b>Conseil :</b> Lancez un appel vidéo, tirez une question à tour de rôle, et laissez la discussion vous rapprocher !<br>
+            <b>Bonus :</b> Cliquez sur le bouton bonus pour des messages doux, blagues ou Citations.<br>
+            <b>Astuce :</b> Vous pouvez envoyer des cœurs à tout moment pour ponctuer la discussion d’un geste tendre.</p>
+        </div>
+        <div class="citation">« L’amour ne connaît pas la distance, il se nourrit de complicité et de petits gestes. »</div>
+    </div>
+    <footer class="footer">&copy; 2025 - Pour tous les couples qui s'aiment de loin 💌</footer>
+    <audio id="startSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5e2.mp3" preload="auto"></audio>
+    <script>
+        // --- Prénoms personnalisés ---
+        const prenom1 = document.getElementById('prenom1');
+        const prenom2 = document.getElementById('prenom2');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        // Pré-remplir si déjà stocké
+        if(localStorage.getItem('prenom1')) prenom1.value = localStorage.getItem('prenom1');
+        if(localStorage.getItem('prenom2')) prenom2.value = localStorage.getItem('prenom2');
+        function updateTitle() {
+            if(prenom1.value && prenom2.value) {
+                welcomeTitle.textContent = `Bienvenue, ${prenom1.value} & ${prenom2.value} !`;
+            } else {
+                welcomeTitle.textContent = 'Bienvenue dans notre espace';
+            }
+        }
+        prenom1.addEventListener('input', updateTitle);
+        prenom2.addEventListener('input', updateTitle);
+        updateTitle();
+        document.getElementById("StartBtn").addEventListener("click", () =>{
+            localStorage.setItem('prenom1', prenom1.value);
+            localStorage.setItem('prenom2', prenom2.value);
+            const audio = document.getElementById("startSound");
+            if(audio) {
+                audio.currentTime = 0;
+                audio.play();
+            }
+            setTimeout(()=>{ window.location.href = "Jeu.html"; }, 350); // Laisse le son se jouer
+        });
+        document.getElementById("infoBtn").addEventListener("click", function() {
+            const panel = document.getElementById("infoPanel");
+            panel.style.display = (panel.style.display === "none") ? "block" : "none";
+        });
+        function createBubble() {
+            const bubble=document.createElement("div");
+            bubble.classList.add("bubble");
+            const size= Math.random()*50+20+ "px";
+            bubble.style.width=size;
+            bubble.style.height=size;
+            bubble.style.left=Math.random()*100+ "vw";
+            bubble.style.animationDuration=(Math.random()*10+6)+"s";
+            document.body.appendChild(bubble);
+            setTimeout(() =>{bubble.remove(); },15000);
+        }
+        setInterval(createBubble,1000);
+
+        // --- Cœurs animés au clic ---
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'flying-heart';
+            heart.innerText = '💖';
+            const colors = ['#ff69b4','#ffb6c1','#ffd6e0','#ff8da1','#ff4f81','#ffb347','#f7cac9'];
+            heart.style.color = colors[Math.floor(Math.random()*colors.length)];
+            heart.style.left = x - 16 + 'px';
+            heart.style.top = y - 16 + 'px';
+            heart.style.transform = `rotate(${Math.random()*40-20}deg)`;
+            document.body.appendChild(heart);
+            setTimeout(()=>{ heart.style.opacity = 0; heart.style.transform += ' translateY(-120px) scale(1.5)'; }, 20);
+            setTimeout(()=>{ heart.remove(); }, 1200);
+        }
+        document.body.addEventListener('click', function(e) {
+            // Ne pas créer de cœur si clic sur un bouton ou un lien
+            if(e.target.closest('button') || e.target.closest('a')) return;
+            createHeart(e.clientX, e.clientY);
+        });
+    </script>
+     <footer id="footerLove" style="position:fixed;bottom:0;left:0;width:100vw;text-align:center;padding:10px 0;background:rgba(255,255,255,0.13);color:#ffe3f0;font-size:1.02rem;letter-spacing:0.02em;z-index:5;backdrop-filter:blur(2px);font-style:italic;">
+        <span id="footerCreator">Ce jeu a été imaginé et créé avec amour par <b style='color:#ffd6e0;'>ta chérie</b> 💖</span>
+    
+    </footer>
+    <script>
+    // Footer : message créatrice
+    document.getElementById('footerCreator').innerHTML = "Ce jeu a été imaginé et créé avec amour par <b style='color:#ffd6e0;'>ta chérie</b> 💖";
+    </script>
+</body>
+</html>
